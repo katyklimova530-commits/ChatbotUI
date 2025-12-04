@@ -18,7 +18,7 @@ const navItems: { id: TabName; label: string; icon: typeof FileText }[] = [
 
 export default function Navigation({ activeTab, onTabChange }: NavigationProps) {
   return (
-    <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mb-12 fade-in">
+    <div className="flex flex-col items-center gap-3 mb-12 fade-in max-w-md mx-auto">
       {navItems.map((item) => {
         const isActive = activeTab === item.id;
         const Icon = item.icon;
@@ -29,7 +29,7 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
             data-testid={`nav-${item.id}`}
             variant="ghost"
             className={`
-              px-5 py-3 rounded-xl font-medium transition-all duration-300
+              w-full px-5 py-3 rounded-xl font-medium transition-all duration-300
               ${isActive 
                 ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white border-2 border-purple-400 shadow-lg" 
                 : "bg-white border-2 border-purple-300 text-purple-700 hover:border-pink-400 hover:bg-purple-50"
