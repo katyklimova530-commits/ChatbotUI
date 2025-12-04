@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* LIGHT MODE */
+/* LIGHT MODE - Светлая тема с яркими обводками */
 :root {
   --button-outline: rgba(0,0,0, .10);
   --badge-outline: rgba(0,0,0, .05);
@@ -10,53 +10,59 @@
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
   --background: 0 0% 100%;
-  --foreground: 0 0% 9%;
-  --border: 0 0% 89%;
-  --card: 0 0% 98%;
-  --card-foreground: 0 0% 9%;
-  --card-border: 0 0% 94%;
-  --sidebar: 0 0% 96%;
-  --sidebar-foreground: 0 0% 9%;
-  --sidebar-border: 0 0% 92%;
-  --sidebar-primary: 262 83% 58%;
-  --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 0 0% 91%;
-  --sidebar-accent-foreground: 0 0% 9%;
-  --sidebar-ring: 262 83% 58%;
-  --popover: 0 0% 94%;
-  --popover-foreground: 0 0% 9%;
-  --popover-border: 0 0% 90%;
-  --primary: 262 83% 58%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 0 0% 92%;
-  --secondary-foreground: 0 0% 9%;
-  --muted: 260 6% 93%;
-  --muted-foreground: 0 0% 45%;
-  --accent: 260 8% 92%;
-  --accent-foreground: 0 0% 9%;
+  --foreground: 270 50% 20%;
+  --border: 280 60% 75%;
+  --card: 270 30% 98%;
+  --card-foreground: 270 50% 20%;
+  --card-border: 280 70% 70%;
+  --sidebar: 270 20% 97%;
+  --sidebar-foreground: 270 50% 20%;
+  --sidebar-border: 280 60% 75%;
+  --sidebar-primary: 280 85% 55%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 270 30% 92%;
+  --sidebar-accent-foreground: 270 50% 20%;
+  --sidebar-ring: 280 85% 55%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 270 50% 20%;
+  --popover-border: 280 70% 70%;
+  --primary: 280 85% 55%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 270 25% 95%;
+  --secondary-foreground: 270 50% 25%;
+  --muted: 270 15% 94%;
+  --muted-foreground: 270 20% 45%;
+  --accent: 320 70% 92%;
+  --accent-foreground: 320 60% 30%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 98%;
-  --input: 0 0% 80%;
-  --ring: 262 83% 58%;
-  --chart-1: 262 83% 45%;
-  --chart-2: 280 65% 50%;
-  --chart-3: 220 70% 50%;
-  --chart-4: 340 75% 55%;
+  --input: 280 40% 85%;
+  --ring: 280 85% 55%;
+  --chart-1: 280 75% 50%;
+  --chart-2: 320 65% 55%;
+  --chart-3: 200 70% 50%;
+  --chart-4: 45 80% 50%;
   --chart-5: 160 60% 45%;
-  --font-sans: Open Sans, sans-serif;
-  --font-serif: Georgia, serif;
+  --font-sans: Inter, sans-serif;
+  --font-serif: Cormorant Garamond, Georgia, serif;
   --font-mono: Menlo, monospace;
   --radius: .5rem;
-  --shadow-2xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.05);
-  --shadow-xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.05);
-  --shadow-sm: 0px 2px 0px 0px hsl(0 0% 0% / 0.05), 0px 1px 2px -1px hsl(0 0% 0% / 0.1);
-  --shadow: 0px 2px 0px 0px hsl(0 0% 0% / 0.05), 0px 1px 2px -1px hsl(0 0% 0% / 0.1);
-  --shadow-md: 0px 2px 0px 0px hsl(0 0% 0% / 0.05), 0px 2px 4px -1px hsl(0 0% 0% / 0.1);
-  --shadow-lg: 0px 2px 0px 0px hsl(0 0% 0% / 0.05), 0px 4px 6px -1px hsl(0 0% 0% / 0.1);
-  --shadow-xl: 0px 2px 0px 0px hsl(0 0% 0% / 0.05), 0px 8px 10px -1px hsl(0 0% 0% / 0.15);
-  --shadow-2xl: 0px 2px 0px 0px hsl(0 0% 0% / 0.1);
+  --shadow-2xs: 0px 2px 0px 0px hsl(280 50% 50% / 0.08);
+  --shadow-xs: 0px 2px 0px 0px hsl(280 50% 50% / 0.08);
+  --shadow-sm: 0px 2px 0px 0px hsl(280 50% 50% / 0.08), 0px 1px 2px -1px hsl(280 50% 50% / 0.12);
+  --shadow: 0px 2px 0px 0px hsl(280 50% 50% / 0.08), 0px 1px 2px -1px hsl(280 50% 50% / 0.12);
+  --shadow-md: 0px 2px 0px 0px hsl(280 50% 50% / 0.08), 0px 2px 4px -1px hsl(280 50% 50% / 0.12);
+  --shadow-lg: 0px 2px 0px 0px hsl(280 50% 50% / 0.08), 0px 4px 6px -1px hsl(280 50% 50% / 0.12);
+  --shadow-xl: 0px 2px 0px 0px hsl(280 50% 50% / 0.08), 0px 8px 10px -1px hsl(280 50% 50% / 0.18);
+  --shadow-2xl: 0px 2px 0px 0px hsl(280 50% 50% / 0.12);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
+  
+  /* Яркие цвета для акцентов */
+  --vibrant-purple: 280 85% 55%;
+  --vibrant-pink: 320 75% 55%;
+  --vibrant-blue: 220 80% 55%;
+  --vibrant-teal: 175 70% 45%;
 
 /* Fallback for older browsers */
   --sidebar-primary-border: hsl(var(--sidebar-primary));
@@ -178,14 +184,31 @@
     width: 8px;
   }
   ::-webkit-scrollbar-track {
-    background: hsl(var(--card));
+    background: hsl(270 20% 95%);
   }
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--primary));
+    background: linear-gradient(180deg, hsl(280 85% 55%), hsl(320 75% 55%));
     border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(262 83% 50%);
+    background: linear-gradient(180deg, hsl(280 85% 45%), hsl(320 75% 45%));
+  }
+}
+
+/* Утилитарные классы для ярких обводок */
+@layer utilities {
+  .border-vibrant {
+    border: 2px solid hsl(280 85% 55%);
+  }
+  
+  .border-vibrant-pink {
+    border: 2px solid hsl(320 75% 55%);
+  }
+  
+  .border-vibrant-gradient {
+    border: 2px solid transparent;
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, hsl(280 85% 55%), hsl(320 75% 55%)) border-box;
   }
 }
 

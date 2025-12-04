@@ -27,12 +27,12 @@ export default function Navigation({ activeTab, onTabChange }: NavigationProps) 
           <Button
             key={item.id}
             data-testid={`nav-${item.id}`}
-            variant={isActive ? "default" : "secondary"}
+            variant="ghost"
             className={`
-              px-5 py-3 rounded-2xl font-bold shadow-lg transition-all duration-300
+              px-5 py-3 rounded-xl font-medium transition-all duration-300
               ${isActive 
-                ? "bg-primary text-primary-foreground ring-2 ring-purple-400" 
-                : "border border-primary/20 hover:border-primary/50"
+                ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white border-2 border-purple-400 shadow-lg" 
+                : "bg-white border-2 border-purple-300 text-purple-700 hover:border-pink-400 hover:bg-purple-50"
               }
             `}
             onClick={() => onTabChange(item.id)}

@@ -69,15 +69,15 @@ export default function VoiceRecorder({ onTranscript, onGeneratePost }: VoiceRec
 
   return (
     <section className="fade-in max-w-2xl mx-auto">
-      <Card className="relative overflow-hidden border-2 border-primary/30">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
+      <Card className="relative overflow-visible bg-white border-2 border-purple-300 shadow-lg">
+        <div className="absolute inset-0 bg-gradient-to-b from-purple-50 to-transparent pointer-events-none rounded-lg" />
         
         <CardHeader className="text-center relative z-10">
-          <CardTitle className="text-3xl font-mystic text-white">
-            <Mic className="inline-block h-8 w-8 mr-2 mb-1" />
+          <CardTitle className="text-3xl font-mystic text-purple-700">
+            <Mic className="inline-block h-8 w-8 mr-2 mb-1 text-pink-500" />
             Голос Потока
           </CardTitle>
-          <p className="text-muted-foreground">
+          <p className="text-purple-500">
             Надиктуйте свои мысли. ИИ превратит их в идеальный пост.
           </p>
         </CardHeader>
@@ -109,8 +109,8 @@ export default function VoiceRecorder({ onTranscript, onGeneratePost }: VoiceRec
 
           {transcript && (
             <div className="text-left fade-in">
-              <label className="text-xs text-muted-foreground mb-1 block">Текст:</label>
-              <div className="bg-card/50 p-4 rounded-lg text-muted-foreground text-sm max-h-32 overflow-y-auto border border-muted">
+              <label className="text-xs text-purple-600 mb-1 block">Текст:</label>
+              <div className="bg-purple-50 p-4 rounded-lg text-purple-700 text-sm max-h-32 overflow-y-auto border-2 border-purple-200">
                 {transcript}
               </div>
             </div>
@@ -121,7 +121,7 @@ export default function VoiceRecorder({ onTranscript, onGeneratePost }: VoiceRec
               onClick={handleGeneratePost}
               disabled={isGenerating}
               data-testid="button-generate-post"
-              className="w-full py-6 bg-primary hover:bg-purple-600 text-white rounded-xl font-bold shadow-lg"
+              className="w-full py-6 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl font-bold shadow-lg border-2 border-purple-400"
             >
               {isGenerating ? (
                 <>
@@ -140,14 +140,14 @@ export default function VoiceRecorder({ onTranscript, onGeneratePost }: VoiceRec
       </Card>
 
       {generatedPost && (
-        <Card className="mt-8 fade-in border-muted">
+        <Card className="mt-8 fade-in bg-white border-2 border-pink-300 shadow-md">
           <CardHeader>
-            <CardTitle className="text-xl font-mystic text-purple-300">
+            <CardTitle className="text-xl font-mystic text-purple-700">
               Готовый Пост
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="prose prose-invert max-w-none text-sm text-muted-foreground whitespace-pre-wrap bg-card/50 p-4 rounded-lg border border-muted">
+            <div className="prose max-w-none text-sm text-purple-700 whitespace-pre-wrap bg-pink-50 p-4 rounded-lg border-2 border-pink-200">
               {generatedPost}
             </div>
             <Button

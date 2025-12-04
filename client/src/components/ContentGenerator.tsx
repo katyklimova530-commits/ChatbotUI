@@ -83,13 +83,13 @@ export default function ContentGenerator({ archetypeActive = false, onGenerate }
 
   return (
     <section className="fade-in space-y-8">
-      <Card className="relative overflow-hidden">
-        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-primary rounded-full blur-3xl opacity-20 pointer-events-none" />
+      <Card className="relative overflow-visible bg-white border-2 border-purple-300 shadow-lg">
+        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-gradient-to-br from-purple-300 to-pink-300 rounded-full blur-3xl opacity-30 pointer-events-none" />
         
         {archetypeActive && (
           <Badge 
             variant="secondary" 
-            className="absolute top-4 right-4 bg-primary/20 text-purple-200 border-primary/30"
+            className="absolute top-4 right-4 bg-purple-100 text-purple-700 border-2 border-purple-400"
           >
             <Dna className="h-3 w-3 mr-1" />
             Архетип активен
@@ -97,7 +97,7 @@ export default function ContentGenerator({ archetypeActive = false, onGenerate }
         )}
         
         <CardHeader>
-          <CardTitle className="text-2xl font-mystic font-semibold text-purple-200">
+          <CardTitle className="text-2xl font-mystic font-semibold text-purple-700">
             Настройки Стратегии
           </CardTitle>
         </CardHeader>
@@ -119,10 +119,10 @@ export default function ContentGenerator({ archetypeActive = false, onGenerate }
                     className="peer sr-only"
                     data-testid="radio-goal-sale"
                   />
-                  <div className="p-4 rounded-xl bg-card border-2 border-transparent peer-checked:border-primary peer-checked:bg-primary/20 transition text-center hover-elevate h-full flex flex-col justify-center items-center shadow-lg">
-                    <Coins className="h-8 w-8 mb-2 text-yellow-400" />
-                    <div className="font-bold text-foreground text-lg">Продажа</div>
-                    <div className="text-xs text-muted-foreground mt-1">Запуски, услуги, консультации</div>
+                  <div className="p-4 rounded-xl bg-white border-2 border-purple-200 peer-checked:border-purple-500 peer-checked:bg-purple-50 transition text-center hover-elevate h-full flex flex-col justify-center items-center shadow-md">
+                    <Coins className="h-8 w-8 mb-2 text-amber-500" />
+                    <div className="font-bold text-purple-700 text-lg">Продажа</div>
+                    <div className="text-xs text-purple-500 mt-1">Запуски, услуги, консультации</div>
                   </div>
                 </label>
                 <label className="cursor-pointer group">
@@ -135,10 +135,10 @@ export default function ContentGenerator({ archetypeActive = false, onGenerate }
                     className="peer sr-only"
                     data-testid="radio-goal-engagement"
                   />
-                  <div className="p-4 rounded-xl bg-card border-2 border-transparent peer-checked:border-pink-500 peer-checked:bg-pink-900/20 transition text-center hover-elevate h-full flex flex-col justify-center items-center shadow-lg">
-                    <Flame className="h-8 w-8 mb-2 text-orange-400" />
-                    <div className="font-bold text-foreground text-lg">Охваты и Вовлечение</div>
-                    <div className="text-xs text-muted-foreground mt-1">Лайки, комменты, доверие</div>
+                  <div className="p-4 rounded-xl bg-white border-2 border-pink-200 peer-checked:border-pink-500 peer-checked:bg-pink-50 transition text-center hover-elevate h-full flex flex-col justify-center items-center shadow-md">
+                    <Flame className="h-8 w-8 mb-2 text-orange-500" />
+                    <div className="font-bold text-pink-700 text-lg">Охваты и Вовлечение</div>
+                    <div className="text-xs text-pink-500 mt-1">Лайки, комменты, доверие</div>
                   </div>
                 </label>
               </div>
@@ -156,7 +156,7 @@ export default function ContentGenerator({ archetypeActive = false, onGenerate }
                   value={niche}
                   onChange={(e) => setNiche(e.target.value)}
                   required
-                  className="bg-card border-primary/50 focus:border-primary"
+                  className="bg-white border-2 border-purple-300 focus:border-purple-500"
                 />
               </div>
               <div>
@@ -164,7 +164,7 @@ export default function ContentGenerator({ archetypeActive = false, onGenerate }
                   Количество дней / Режим
                 </Label>
                 <Select value={days} onValueChange={(v) => setDays(v as DaysCount)}>
-                  <SelectTrigger data-testid="select-days" className="bg-card border-primary/50">
+                  <SelectTrigger data-testid="select-days" className="bg-white border-2 border-purple-300">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -191,7 +191,7 @@ export default function ContentGenerator({ archetypeActive = false, onGenerate }
                     value={product}
                     onChange={(e) => setProduct(e.target.value)}
                     required
-                    className="bg-card border-primary/50 focus:border-primary"
+                    className="bg-white border-2 border-purple-300 focus:border-purple-500"
                     rows={2}
                   />
                 </div>
@@ -201,7 +201,7 @@ export default function ContentGenerator({ archetypeActive = false, onGenerate }
                     Тип Стратегии Продаж
                   </Label>
                   <Select value={strategy} onValueChange={(v) => setStrategy(v as StrategyType)}>
-                    <SelectTrigger data-testid="select-strategy" className="bg-card border-primary/50">
+                    <SelectTrigger data-testid="select-strategy" className="bg-white border-2 border-purple-300">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -217,7 +217,7 @@ export default function ContentGenerator({ archetypeActive = false, onGenerate }
               type="submit"
               data-testid="button-generate"
               disabled={isGenerating || !niche}
-              className="w-full py-6 bg-gradient-to-r from-primary to-indigo-800 hover:from-purple-600 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg"
+              className="w-full py-6 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-xl shadow-lg border-2 border-purple-400"
             >
               {isGenerating ? (
                 <>
@@ -237,8 +237,8 @@ export default function ContentGenerator({ archetypeActive = false, onGenerate }
 
       {generatedContent.length > 0 && (
         <div className="space-y-6 fade-in">
-          <div className="flex justify-between items-center border-b border-primary/30 pb-4 flex-wrap gap-2">
-            <h2 className="text-3xl font-mystic text-purple-200">Ваш Контент-План</h2>
+          <div className="flex justify-between items-center border-b-2 border-purple-300 pb-4 flex-wrap gap-2">
+            <h2 className="text-3xl font-mystic text-purple-700">Ваш Контент-План</h2>
             <Button 
               variant="ghost" 
               size="sm"
@@ -252,17 +252,17 @@ export default function ContentGenerator({ archetypeActive = false, onGenerate }
           
           <div className="space-y-6">
             {generatedContent.map((day) => (
-              <Card key={day.day} className="bg-card border-primary/30">
+              <Card key={day.day} className="bg-white border-2 border-purple-300 shadow-md">
                 <CardHeader className="pb-2">
                   <div className="flex items-center gap-3 flex-wrap">
-                    <Badge variant="secondary" className="bg-primary/20 text-purple-200">
+                    <Badge variant="secondary" className="bg-purple-100 text-purple-700 border-2 border-purple-400">
                       День {day.day}
                     </Badge>
-                    <Badge variant="outline" className="text-muted-foreground">
+                    <Badge variant="outline" className="text-purple-600 border-2 border-pink-300">
                       {day.type}
                     </Badge>
                   </div>
-                  <CardTitle className="text-xl font-mystic text-purple-200 mt-2">
+                  <CardTitle className="text-xl font-mystic text-purple-700 mt-2">
                     {day.title}
                   </CardTitle>
                 </CardHeader>

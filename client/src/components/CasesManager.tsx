@@ -143,31 +143,31 @@ export default function CasesManager({ onSaveCase }: CasesManagerProps) {
     <section className="fade-in">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-5 space-y-6">
-          <Card className="border-primary/30">
+          <Card className="bg-white border-2 border-purple-300 shadow-lg">
             <CardHeader>
-              <CardTitle className="text-2xl font-mystic text-purple-200">
+              <CardTitle className="text-2xl font-mystic text-purple-700">
                 Создать Кейс
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label className="block text-sm text-purple-300 mb-2">1. Скриншот</Label>
-                <div className="relative border-2 border-dashed border-primary/30 rounded-xl p-6 text-center cursor-pointer hover-elevate transition group">
+                <Label className="block text-sm text-purple-600 mb-2">1. Скриншот</Label>
+                <div className="relative border-2 border-dashed border-purple-300 rounded-xl p-6 text-center cursor-pointer hover-elevate transition group bg-purple-50">
                   <input
                     type="file"
                     className="absolute inset-0 opacity-0 cursor-pointer"
                     accept="image/*"
                     data-testid="input-screenshot"
                   />
-                  <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground group-hover:text-foreground" />
-                  <div className="text-muted-foreground text-sm group-hover:text-foreground">
+                  <Upload className="h-8 w-8 mx-auto mb-2 text-purple-400 group-hover:text-purple-600" />
+                  <div className="text-purple-500 text-sm group-hover:text-purple-700">
                     Загрузить (JPG, PNG)
                   </div>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="mt-2 w-full text-blue-300 hover:text-blue-200 bg-blue-600/10"
+                  className="mt-2 w-full text-blue-600 hover:text-blue-700 bg-blue-50 border border-blue-200"
                   data-testid="button-recognize"
                 >
                   <Eye className="h-4 w-4 mr-2" />
@@ -176,12 +176,12 @@ export default function CasesManager({ onSaveCase }: CasesManagerProps) {
               </div>
 
               <div>
-                <Label className="block text-sm text-purple-300 mb-2">2. Текст отзыва</Label>
+                <Label className="block text-sm text-purple-600 mb-2">2. Текст отзыва</Label>
                 <Textarea
                   value={reviewText}
                   onChange={(e) => setReviewText(e.target.value)}
                   placeholder="Вставьте текст отзыва клиента..."
-                  className="bg-card border-muted"
+                  className="bg-white border-2 border-purple-200"
                   rows={3}
                   data-testid="textarea-review"
                 />
@@ -189,39 +189,39 @@ export default function CasesManager({ onSaveCase }: CasesManagerProps) {
 
               <div className="space-y-3">
                 <div>
-                  <Label className="text-xs text-muted-foreground mb-1 block">БЫЛО</Label>
+                  <Label className="text-xs text-purple-500 mb-1 block">БЫЛО</Label>
                   <Input
                     value={before}
                     onChange={(e) => setBefore(e.target.value)}
                     placeholder="Исходная ситуация"
-                    className="bg-card border-muted"
+                    className="bg-white border-2 border-purple-200"
                     data-testid="input-before"
                   />
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground mb-1 block">СДЕЛАЛИ</Label>
+                  <Label className="text-xs text-purple-500 mb-1 block">СДЕЛАЛИ</Label>
                   <Input
                     value={action}
                     onChange={(e) => setAction(e.target.value)}
                     placeholder="Что было сделано"
-                    className="bg-card border-muted"
+                    className="bg-white border-2 border-purple-200"
                     data-testid="input-action"
                   />
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground mb-1 block">СТАЛО</Label>
+                  <Label className="text-xs text-purple-500 mb-1 block">СТАЛО</Label>
                   <Input
                     value={after}
                     onChange={(e) => setAfter(e.target.value)}
                     placeholder="Результат"
-                    className="bg-card border-muted"
+                    className="bg-white border-2 border-purple-200"
                     data-testid="input-after"
                   />
                 </div>
               </div>
 
               <div>
-                <Label className="block text-sm text-purple-300 mb-2">Теги</Label>
+                <Label className="block text-sm text-purple-600 mb-2">Теги</Label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {suggestedTags.map((tag) => (
                     <Badge
@@ -240,7 +240,7 @@ export default function CasesManager({ onSaveCase }: CasesManagerProps) {
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={handleTagInputKeyDown}
                   placeholder="Введите тег и нажмите Enter"
-                  className="bg-card border-muted"
+                  className="bg-white border-2 border-purple-200"
                   data-testid="input-tag"
                 />
                 {tags.length > 0 && (
@@ -264,7 +264,7 @@ export default function CasesManager({ onSaveCase }: CasesManagerProps) {
               <Button
                 onClick={handleGenerate}
                 disabled={isGenerating || !reviewText}
-                className="w-full py-6 bg-gradient-to-r from-primary to-pink-600 font-bold"
+                className="w-full py-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold border-2 border-purple-400 shadow-lg"
                 data-testid="button-generate-case"
               >
                 {isGenerating ? (
@@ -285,46 +285,46 @@ export default function CasesManager({ onSaveCase }: CasesManagerProps) {
 
         <div className="lg:col-span-7 space-y-6">
           {generatedCase && (
-            <Card className="border-2 border-primary relative fade-in">
+            <Card className="border-2 border-pink-400 bg-white relative fade-in shadow-lg">
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute top-2 right-2"
+                className="absolute top-2 right-2 text-purple-600"
                 onClick={() => setGeneratedCase(null)}
                 data-testid="button-close-preview"
               >
                 <X className="h-4 w-4" />
               </Button>
               <CardHeader>
-                <CardTitle className="text-xl font-mystic text-white">
+                <CardTitle className="text-xl font-mystic text-purple-700">
                   Готовый Кейс
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label className="text-xs text-muted-foreground">Заголовки</Label>
+                  <Label className="text-xs text-purple-500">Заголовки</Label>
                   <div className="space-y-2 mt-1">
                     {generatedCase.generatedHeadlines?.map((headline, idx) => (
-                      <div key={idx} className="p-2 bg-card rounded text-sm">
+                      <div key={idx} className="p-2 bg-purple-50 rounded text-sm text-purple-700 border border-purple-200">
                         {headline}
                       </div>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground">Цитата</Label>
-                  <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground my-2 bg-card/50 p-3 rounded-r">
+                  <Label className="text-xs text-purple-500">Цитата</Label>
+                  <blockquote className="border-l-4 border-pink-400 pl-4 italic text-purple-600 my-2 bg-pink-50 p-3 rounded-r">
                     "{generatedCase.generatedQuote}"
                   </blockquote>
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground">Текст</Label>
-                  <div className="bg-card p-4 rounded-lg text-sm text-muted-foreground whitespace-pre-wrap max-h-64 overflow-y-auto border border-muted">
+                  <Label className="text-xs text-purple-500">Текст</Label>
+                  <div className="bg-purple-50 p-4 rounded-lg text-sm text-purple-700 whitespace-pre-wrap max-h-64 overflow-y-auto border-2 border-purple-200">
                     {generatedCase.generatedBody}
                   </div>
                 </div>
                 <div className="flex gap-3 flex-wrap">
-                  <Button onClick={handleSaveCase} className="flex-1" data-testid="button-save-case">
+                  <Button onClick={handleSaveCase} className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white" data-testid="button-save-case">
                     <Save className="h-4 w-4 mr-2" />
                     В Библиотеку
                   </Button>
@@ -333,7 +333,7 @@ export default function CasesManager({ onSaveCase }: CasesManagerProps) {
                   </Button>
                   <Button 
                     variant="secondary" 
-                    className="bg-pink-600/20 hover:bg-pink-600/30 text-pink-300"
+                    className="bg-pink-100 hover:bg-pink-200 text-pink-700 border-2 border-pink-300"
                     onClick={() => setShowVisualModal(true)}
                     data-testid="button-create-visual"
                   >
@@ -345,27 +345,27 @@ export default function CasesManager({ onSaveCase }: CasesManagerProps) {
             </Card>
           )}
 
-          <Card className="border-primary/20">
+          <Card className="bg-white border-2 border-purple-300 shadow-md">
             <CardHeader>
               <div className="flex justify-between items-center gap-4 flex-wrap">
-                <CardTitle className="text-2xl font-mystic text-purple-200">
+                <CardTitle className="text-2xl font-mystic text-purple-700">
                   Библиотека
                 </CardTitle>
                 <div className="flex gap-2 flex-wrap">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-purple-400" />
                     <Input
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Поиск..."
-                      className="bg-card border-muted pl-9 w-32 focus:w-40 transition-all"
+                      className="bg-white border-2 border-purple-200 pl-9 w-32 focus:w-40 transition-all"
                       data-testid="input-search-cases"
                     />
                   </div>
                   <select
                     value={filterTag}
                     onChange={(e) => setFilterTag(e.target.value)}
-                    className="bg-card border border-muted text-foreground text-sm rounded-md px-3 py-2"
+                    className="bg-white border-2 border-purple-200 text-purple-700 text-sm rounded-md px-3 py-2"
                     data-testid="select-filter-tag"
                   >
                     <option value="all">Все теги</option>
@@ -379,17 +379,17 @@ export default function CasesManager({ onSaveCase }: CasesManagerProps) {
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto">
                 {filteredCases.map((caseItem) => (
-                  <Card key={caseItem.id} className="bg-gradient-to-br from-primary/20 to-card border-primary/20 hover-elevate cursor-pointer">
+                  <Card key={caseItem.id} className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 hover-elevate cursor-pointer">
                     <CardContent className="p-4">
-                      <h4 className="font-medium text-foreground mb-2 line-clamp-2">
+                      <h4 className="font-medium text-purple-700 mb-2 line-clamp-2">
                         {caseItem.generatedHeadlines?.[0] || caseItem.before + " → " + caseItem.after}
                       </h4>
-                      <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
+                      <p className="text-xs text-purple-500 line-clamp-2 mb-3">
                         "{caseItem.generatedQuote || caseItem.reviewText}"
                       </p>
                       <div className="flex flex-wrap gap-1">
                         {caseItem.tags.map((tag) => (
-                          <Badge key={tag} variant="secondary" className="text-xs">
+                          <Badge key={tag} variant="secondary" className="text-xs bg-purple-100 text-purple-700 border border-purple-300">
                             {tag}
                           </Badge>
                         ))}

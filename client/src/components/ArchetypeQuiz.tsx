@@ -103,9 +103,9 @@ export default function ArchetypeQuiz({ onComplete, onApply }: ArchetypeQuizProp
   if (profile) {
     return (
       <section className="fade-in">
-        <Card className="relative overflow-hidden bg-gradient-to-br from-card via-card to-primary/10 border-primary/30">
+        <Card className="relative overflow-visible bg-white border-2 border-purple-300 shadow-lg">
           <div 
-            className="absolute inset-0 opacity-20"
+            className="absolute inset-0 opacity-10 rounded-lg"
             style={{
               background: `linear-gradient(135deg, ${profile.visualGuide.colors[0]}40 0%, ${profile.visualGuide.colors[1]}40 100%)`
             }}
@@ -114,7 +114,7 @@ export default function ArchetypeQuiz({ onComplete, onApply }: ArchetypeQuizProp
           <Button
             variant="ghost"
             size="sm"
-            className="absolute top-4 right-4 text-muted-foreground"
+            className="absolute top-4 right-4 text-purple-600"
             onClick={handleReset}
             data-testid="button-reset-quiz"
           >
@@ -125,49 +125,49 @@ export default function ArchetypeQuiz({ onComplete, onApply }: ArchetypeQuizProp
           <CardContent className="relative z-10 p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
               <div>
-                <Badge variant="secondary" className="mb-4 bg-white/10 text-white tracking-widest uppercase">
+                <Badge variant="secondary" className="mb-4 bg-purple-100 text-purple-700 border-2 border-purple-400 tracking-widest uppercase">
                   Ваш стиль
                 </Badge>
-                <h2 className="text-4xl md:text-5xl font-mystic text-white mb-4 font-bold leading-tight">
+                <h2 className="text-4xl md:text-5xl font-mystic bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent mb-4 font-bold leading-tight">
                   {profile.topArchetypes.join("-")}
                 </h2>
-                <p className="text-muted-foreground text-lg mb-6">{profile.description}</p>
+                <p className="text-purple-600 text-lg mb-6">{profile.description}</p>
                 
                 <div className="flex flex-wrap gap-2 mb-6">
                   {profile.brandVoice.keywords.map((keyword) => (
-                    <Badge key={keyword} variant="outline" className="bg-white/5">
+                    <Badge key={keyword} variant="outline" className="bg-pink-50 text-pink-700 border-2 border-pink-300">
                       {keyword}
                     </Badge>
                   ))}
                 </div>
 
-                <Card className="bg-black/30 border-white/10">
+                <Card className="bg-purple-50 border-2 border-purple-200">
                   <CardContent className="p-4">
-                    <h4 className="text-purple-300 text-xs uppercase font-bold mb-2">
+                    <h4 className="text-purple-700 text-xs uppercase font-bold mb-2">
                       Тональность (Tone of Voice)
                     </h4>
-                    <p className="text-sm text-muted-foreground italic">
+                    <p className="text-sm text-purple-600 italic">
                       {profile.brandVoice.tone}
                     </p>
                   </CardContent>
                 </Card>
               </div>
 
-              <Card className="bg-card/50 border-white/10">
+              <Card className="bg-pink-50 border-2 border-pink-300">
                 <CardHeader>
-                  <CardTitle className="text-xl font-mystic text-white flex items-center gap-2">
-                    <Palette className="h-5 w-5" />
+                  <CardTitle className="text-xl font-mystic text-purple-700 flex items-center gap-2">
+                    <Palette className="h-5 w-5 text-pink-500" />
                     Визуальный код
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <span className="text-xs text-muted-foreground block mb-2">Цвета</span>
+                    <span className="text-xs text-purple-500 block mb-2">Цвета</span>
                     <div className="flex gap-3">
                       {profile.visualGuide.colors.map((color) => (
                         <div
                           key={color}
-                          className="w-12 h-12 rounded-lg shadow-lg ring-2 ring-white/20"
+                          className="w-12 h-12 rounded-lg shadow-lg ring-2 ring-purple-300"
                           style={{ backgroundColor: color }}
                           title={color}
                         />
@@ -175,12 +175,12 @@ export default function ArchetypeQuiz({ onComplete, onApply }: ArchetypeQuizProp
                     </div>
                   </div>
                   <div>
-                    <span className="text-xs text-muted-foreground block">Шрифты</span>
-                    <span className="text-white text-sm">{profile.visualGuide.fonts}</span>
+                    <span className="text-xs text-purple-500 block">Шрифты</span>
+                    <span className="text-purple-700 text-sm">{profile.visualGuide.fonts}</span>
                   </div>
                   <div>
-                    <span className="text-xs text-muted-foreground block">Атмосфера (Vibe)</span>
-                    <span className="text-white text-sm">{profile.visualGuide.vibes}</span>
+                    <span className="text-xs text-purple-500 block">Атмосфера (Vibe)</span>
+                    <span className="text-purple-700 text-sm">{profile.visualGuide.vibes}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -190,12 +190,12 @@ export default function ArchetypeQuiz({ onComplete, onApply }: ArchetypeQuizProp
               <Button
                 onClick={handleApply}
                 data-testid="button-apply-archetype"
-                className="bg-white text-primary hover:bg-purple-50 font-bold shadow-lg"
+                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 font-bold shadow-lg border-2 border-purple-400"
               >
                 <Check className="h-5 w-5 mr-2" />
                 Активировать этот стиль
               </Button>
-              <p className="text-xs text-muted-foreground mt-2">
+              <p className="text-xs text-purple-500 mt-2">
                 Стиль будет применен ко всем будущим генерациям контента
               </p>
             </div>
@@ -207,21 +207,21 @@ export default function ArchetypeQuiz({ onComplete, onApply }: ArchetypeQuizProp
 
   return (
     <section className="fade-in">
-      <Card className="border-primary/30">
+      <Card className="bg-white border-2 border-purple-300 shadow-lg">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-mystic text-purple-200 mb-2">
+          <CardTitle className="text-3xl font-mystic text-purple-700 mb-2">
             ДНК Вашего Личного Бренда
           </CardTitle>
-          <p className="text-muted-foreground">
+          <p className="text-purple-500">
             Пройдите диагностику, чтобы нейросеть "заговорила" вашим голосом.
           </p>
         </CardHeader>
         
         <CardContent className="max-w-2xl mx-auto space-y-6">
           {archetypeQuestions.map((question, idx) => (
-            <Card key={idx} className="bg-card/50 border-muted">
+            <Card key={idx} className="bg-purple-50 border-2 border-purple-200">
               <CardContent className="p-6">
-                <h4 className="text-lg text-foreground mb-4 font-medium">
+                <h4 className="text-lg text-purple-700 mb-4 font-medium">
                   {idx + 1}. {question.q}
                 </h4>
                 <RadioGroup
@@ -231,7 +231,7 @@ export default function ArchetypeQuiz({ onComplete, onApply }: ArchetypeQuizProp
                   {question.a.map((answer, aIdx) => (
                     <div
                       key={aIdx}
-                      className="flex items-center space-x-3 p-3 rounded-lg hover-elevate cursor-pointer"
+                      className="flex items-center space-x-3 p-3 rounded-lg hover-elevate cursor-pointer bg-white border border-purple-100"
                     >
                       <RadioGroupItem
                         value={answer}
@@ -240,7 +240,7 @@ export default function ArchetypeQuiz({ onComplete, onApply }: ArchetypeQuizProp
                       />
                       <Label
                         htmlFor={`q${idx}-a${aIdx}`}
-                        className="text-muted-foreground text-sm cursor-pointer flex-1"
+                        className="text-purple-600 text-sm cursor-pointer flex-1"
                       >
                         {answer}
                       </Label>
@@ -256,7 +256,7 @@ export default function ArchetypeQuiz({ onComplete, onApply }: ArchetypeQuizProp
               onClick={handleSubmit}
               disabled={isAnalyzing}
               data-testid="button-submit-quiz"
-              className="px-8 py-6 bg-gradient-to-r from-pink-600 to-primary text-white font-bold rounded-xl shadow-lg"
+              className="px-8 py-6 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold rounded-xl shadow-lg border-2 border-pink-400"
             >
               {isAnalyzing ? (
                 <>
