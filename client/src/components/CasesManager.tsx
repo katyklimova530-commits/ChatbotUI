@@ -45,18 +45,15 @@ export default function CasesManager() {
 
   const saveCaseMutation = useMutation({
     mutationFn: async (caseData: CaseData) => {
-      return apiRequest("/api/cases", {
-        method: "POST",
-        body: JSON.stringify({
-          reviewText: caseData.reviewText,
-          before: caseData.before,
-          action: caseData.action,
-          after: caseData.after,
-          tags: caseData.tags,
-          generatedHeadlines: caseData.generatedHeadlines,
-          generatedQuote: caseData.generatedQuote,
-          generatedBody: caseData.generatedBody,
-        }),
+      return apiRequest("POST", "/api/cases", {
+        reviewText: caseData.reviewText,
+        before: caseData.before,
+        action: caseData.action,
+        after: caseData.after,
+        tags: caseData.tags,
+        generatedHeadlines: caseData.generatedHeadlines,
+        generatedQuote: caseData.generatedQuote,
+        generatedBody: caseData.generatedBody,
       });
     },
     onSuccess: () => {
