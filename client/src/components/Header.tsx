@@ -6,7 +6,6 @@ interface HeaderProps {
 }
 
 export default function Header({ 
-  title = "Ваш персональный ЭЗО-маркетолог",
   subtitle = "Стратегия • Контент • Энергия • Продажи"
 }: HeaderProps) {
   return (
@@ -15,7 +14,8 @@ export default function Header({
         <Sparkles className="h-8 w-8 text-purple-500" />
       </div>
       <h1 className="text-4xl sm:text-6xl font-mystic font-semibold bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 bg-clip-text text-transparent mb-3 tracking-wide">
-        {title}
+        <span className="block">Ваш персональный</span>
+        <span className="block">ЭЗО-маркетолог</span>
       </h1>
       <p className="text-purple-500 text-lg sm:text-xl font-light tracking-wider uppercase">
         {subtitle}
