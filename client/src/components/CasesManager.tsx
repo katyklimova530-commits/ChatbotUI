@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,9 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Upload, Eye, Loader2, Rocket, Save, Copy, Palette, X, Search } from "lucide-react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import type { CaseStudy } from "@shared/schema";
 
 interface CaseData {
-  id: string;
+  id?: string;
   screenshot?: string;
   reviewText: string;
   before: string;
@@ -23,11 +26,7 @@ interface CaseData {
 
 const suggestedTags = ["Деньги", "Отношения", "Здоровье", "Предназначение"];
 
-interface CasesManagerProps {
-  onSaveCase?: (caseData: CaseData) => void;
-}
-
-export default function CasesManager({ onSaveCase }: CasesManagerProps) {
+export default function CasesManager() {
   const [reviewText, setReviewText] = useState("");
   const [before, setBefore] = useState("");
   const [action, setAction] = useState("");
@@ -40,31 +39,36 @@ export default function CasesManager({ onSaveCase }: CasesManagerProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterTag, setFilterTag] = useState("all");
 
-  // todo: remove mock functionality
-  const [savedCases, setSavedCases] = useState<CaseData[]>([
-    {
-      id: "1",
-      reviewText: "После консультации мой бизнес вырос в 3 раза!",
-      before: "Застой в бизнесе",
-      action: "Анализ судьбы + расклад на деньги",
-      after: "Рост дохода x3",
-      tags: ["Деньги", "Бизнес"],
-      generatedHeadlines: ["Как энергетический расклад помог увеличить доход в 3 раза"],
-      generatedQuote: "Я не верила в Таро, пока не увидела результат",
-      generatedBody: "История трансформации моей клиентки..."
+  const { data: savedCases = [], isLoading } = useQuery<CaseStudy[]>({
+    queryKey: ["/api/cases"],
+  });
+
+  const saveCaseMutation = useMutation({
+    mutationFn: async (caseData: CaseData) => {
+      return apiRequest("/api/cases", {
+        method: "POST",
+        body: JSON.stringify({
+          reviewText: caseData.reviewText,
+          before: caseData.before,
+          action: caseData.action,
+          after: caseData.after,
+          tags: caseData.tags,
+          generatedHeadlines: caseData.generatedHeadlines,
+          generatedQuote: caseData.generatedQuote,
+          generatedBody: caseData.generatedBody,
+        }),
+      });
     },
-    {
-      id: "2",
-      reviewText: "Наконец-то нашла своего человека благодаря работе над родовыми сценариями",
-      before: "Одиночество 5 лет",
-      action: "Проработка родовых сценариев",
-      after: "Счастливые отношения",
-      tags: ["Отношения"],
-      generatedHeadlines: ["От одиночества к счастливым отношениям"],
-      generatedQuote: "Родовые сценарии блокировали мое счастье",
-      generatedBody: "Когда Анна пришла ко мне, она была в отчаянии..."
-    }
-  ]);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cases"] });
+      setGeneratedCase(null);
+      setReviewText("");
+      setBefore("");
+      setAction("");
+      setAfter("");
+      setTags([]);
+    },
+  });
 
   const addTag = (tag: string) => {
     if (tag && !tags.includes(tag)) {
@@ -87,10 +91,8 @@ export default function CasesManager({ onSaveCase }: CasesManagerProps) {
   const handleGenerate = () => {
     setIsGenerating(true);
     
-    // todo: remove mock functionality
     setTimeout(() => {
       const newCase: CaseData = {
-        id: Date.now().toString(),
         reviewText,
         before,
         action,
@@ -101,7 +103,7 @@ export default function CasesManager({ onSaveCase }: CasesManagerProps) {
           "История трансформации: от долгов к процветанию",
           "Реальный отзыв клиента о работе с энергией денег"
         ],
-        generatedQuote: reviewText.slice(0, 100) + "...",
+        generatedQuote: reviewText.slice(0, 100) + (reviewText.length > 100 ? "..." : ""),
         generatedBody: `БЫЛО: ${before}\n\nКлиентка обратилась ко мне с запросом на проработку финансовой сферы. Ситуация казалась безвыходной...\n\nСДЕЛАЛИ: ${action}\n\nМы провели глубокую работу с энергетическими блоками и родовыми программами...\n\nСТАЛО: ${after}\n\nУже через месяц ситуация начала меняться. Появились новые возможности...`
       };
       setGeneratedCase(newCase);
@@ -111,14 +113,7 @@ export default function CasesManager({ onSaveCase }: CasesManagerProps) {
 
   const handleSaveCase = () => {
     if (generatedCase) {
-      setSavedCases([generatedCase, ...savedCases]);
-      onSaveCase?.(generatedCase);
-      setGeneratedCase(null);
-      setReviewText("");
-      setBefore("");
-      setAction("");
-      setAfter("");
-      setTags([]);
+      saveCaseMutation.mutate(generatedCase);
     }
   };
 
@@ -131,13 +126,14 @@ export default function CasesManager({ onSaveCase }: CasesManagerProps) {
 
   const filteredCases = savedCases.filter(c => {
     const matchesSearch = c.reviewText.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.before.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.after.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTag = filterTag === "all" || c.tags.includes(filterTag);
+      (c.before?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+      (c.after?.toLowerCase() || "").includes(searchQuery.toLowerCase());
+    const tags = c.tags as string[];
+    const matchesTag = filterTag === "all" || tags.includes(filterTag);
     return matchesSearch && matchesTag;
   });
 
-  const allTags = Array.from(new Set(savedCases.flatMap(c => c.tags)));
+  const allTags = Array.from(new Set(savedCases.flatMap(c => c.tags as string[])));
 
   return (
     <section className="fade-in">
@@ -324,8 +320,17 @@ export default function CasesManager({ onSaveCase }: CasesManagerProps) {
                   </div>
                 </div>
                 <div className="flex gap-3 flex-wrap">
-                  <Button onClick={handleSaveCase} className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white" data-testid="button-save-case">
-                    <Save className="h-4 w-4 mr-2" />
+                  <Button 
+                    onClick={handleSaveCase} 
+                    disabled={saveCaseMutation.isPending}
+                    className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white" 
+                    data-testid="button-save-case"
+                  >
+                    {saveCaseMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4 mr-2" />
+                    )}
                     В Библиотеку
                   </Button>
                   <Button variant="secondary" onClick={handleCopyCase} data-testid="button-copy-case">
@@ -377,27 +382,37 @@ export default function CasesManager({ onSaveCase }: CasesManagerProps) {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto">
-                {filteredCases.map((caseItem) => (
-                  <Card key={caseItem.id} className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 hover-elevate cursor-pointer">
-                    <CardContent className="p-4">
-                      <h4 className="font-medium text-purple-700 mb-2 line-clamp-2">
-                        {caseItem.generatedHeadlines?.[0] || caseItem.before + " → " + caseItem.after}
-                      </h4>
-                      <p className="text-xs text-purple-500 line-clamp-2 mb-3">
-                        "{caseItem.generatedQuote || caseItem.reviewText}"
-                      </p>
-                      <div className="flex flex-wrap gap-1">
-                        {caseItem.tags.map((tag) => (
-                          <Badge key={tag} variant="secondary" className="text-xs bg-purple-100 text-purple-700 border border-purple-300">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+              {isLoading ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
+                </div>
+              ) : filteredCases.length === 0 ? (
+                <div className="text-center py-8 text-purple-400">
+                  Пока нет сохраненных кейсов
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto">
+                  {filteredCases.map((caseItem) => (
+                    <Card key={caseItem.id} className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 hover-elevate cursor-pointer">
+                      <CardContent className="p-4">
+                        <h4 className="font-medium text-purple-700 mb-2 line-clamp-2">
+                          {(caseItem.generatedHeadlines as string[])?.[0] || (caseItem.before || "") + " → " + (caseItem.after || "")}
+                        </h4>
+                        <p className="text-xs text-purple-500 line-clamp-2 mb-3">
+                          "{caseItem.generatedQuote || caseItem.reviewText}"
+                        </p>
+                        <div className="flex flex-wrap gap-1">
+                          {(caseItem.tags as string[]).map((tag) => (
+                            <Badge key={tag} variant="secondary" className="text-xs bg-purple-100 text-purple-700 border border-purple-300">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
