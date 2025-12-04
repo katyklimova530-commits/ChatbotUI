@@ -1,10 +1,13 @@
 import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Loader2, Check, RotateCcw, Sparkles, Palette } from "lucide-react";
+import { Loader2, Check, RotateCcw, Sparkles, Palette, History } from "lucide-react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import type { ArchetypeResult } from "@shared/schema";
 
 interface Question {
   q: string;
@@ -57,6 +60,25 @@ export default function ArchetypeQuiz({ onComplete, onApply }: ArchetypeQuizProp
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [profile, setProfile] = useState<ArchetypeProfile | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+
+  const { data: latestResult } = useQuery<ArchetypeResult | null>({
+    queryKey: ["/api/archetypes/latest"],
+  });
+
+  const { data: allResults = [] } = useQuery<ArchetypeResult[]>({
+    queryKey: ["/api/archetypes"],
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: async (data: { archetypeName: string; archetypeDescription: string; answers: number[]; recommendations: string[] }) => {
+      return apiRequest("POST", "/api/archetypes", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/archetypes"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/archetypes/latest"] });
+    },
+  });
 
   const handleSubmit = () => {
     const allAnswered = archetypeQuestions.every((_, idx) => answers[idx]);
@@ -67,7 +89,11 @@ export default function ArchetypeQuiz({ onComplete, onApply }: ArchetypeQuizProp
 
     setIsAnalyzing(true);
 
-    // todo: remove mock functionality
+    const answerIndices = archetypeQuestions.map((q, idx) => {
+      const selectedAnswer = answers[idx];
+      return q.a.indexOf(selectedAnswer);
+    });
+
     setTimeout(() => {
       const mockProfile: ArchetypeProfile = {
         topArchetypes: ["Маг", "Мудрец", "Бунтарь"],
@@ -82,6 +108,14 @@ export default function ArchetypeQuiz({ onComplete, onApply }: ArchetypeQuizProp
           vibes: "Мистический минимализм с золотыми акцентами"
         }
       };
+      
+      saveMutation.mutate({
+        archetypeName: mockProfile.topArchetypes.join("-"),
+        archetypeDescription: mockProfile.description,
+        answers: answerIndices,
+        recommendations: mockProfile.brandVoice.keywords,
+      });
+      
       setProfile(mockProfile);
       setIsAnalyzing(false);
       onComplete?.(mockProfile);
@@ -111,16 +145,30 @@ export default function ArchetypeQuiz({ onComplete, onApply }: ArchetypeQuizProp
             }}
           />
           
-          <Button
-            variant="ghost"
-            size="sm"
-            className="absolute top-4 right-4 text-purple-600"
-            onClick={handleReset}
-            data-testid="button-reset-quiz"
-          >
-            <RotateCcw className="h-4 w-4 mr-1" />
-            Пройти заново
-          </Button>
+          <div className="absolute top-4 right-4 flex gap-2">
+            {allResults.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-purple-600"
+                onClick={() => setShowHistory(!showHistory)}
+                data-testid="button-show-history"
+              >
+                <History className="h-4 w-4 mr-1" />
+                История ({allResults.length})
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-purple-600"
+              onClick={handleReset}
+              data-testid="button-reset-quiz"
+            >
+              <RotateCcw className="h-4 w-4 mr-1" />
+              Пройти заново
+            </Button>
+          </div>
 
           <CardContent className="relative z-10 p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">

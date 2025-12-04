@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,7 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dna, Loader2, Printer, Coins, Flame, Sparkles } from "lucide-react";
+import { Dna, Loader2, Printer, Coins, Flame, Sparkles, Save, Check, History, Trash2 } from "lucide-react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import type { ContentStrategy, ContentPost } from "@shared/schema";
 
 type ContentGoal = "sale" | "engagement";
 type DaysCount = "today" | "3" | "7" | "14" | "30";
@@ -39,10 +42,59 @@ export default function ContentGenerator({ archetypeActive = false, onGenerate }
   const [strategy, setStrategy] = useState<StrategyType>("general");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<ContentDay[]>([]);
+  const [saved, setSaved] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+
+  const { data: savedStrategies = [] } = useQuery<ContentStrategy[]>({
+    queryKey: ["/api/strategies"],
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: async (data: { topic: string; goal: string; days: number; posts: ContentPost[] }) => {
+      return apiRequest("POST", "/api/strategies", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/strategies"] });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return apiRequest("DELETE", `/api/strategies/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/strategies"] });
+    },
+  });
+
+  const getDaysNumber = (daysValue: DaysCount): number => {
+    if (daysValue === "today") return 1;
+    return parseInt(daysValue);
+  };
+
+  const handleSaveStrategy = () => {
+    const posts: ContentPost[] = generatedContent.map(day => ({
+      day: day.day,
+      topic: day.title,
+      hook: day.content,
+      cta: day.type,
+      hashtags: day.hashtags,
+    }));
+
+    saveMutation.mutate({
+      topic: niche,
+      goal: goal,
+      days: getDaysNumber(days),
+      posts: posts,
+    });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsGenerating(true);
+    setSaved(false);
     
     onGenerate?.({
       goal,
@@ -52,7 +104,6 @@ export default function ContentGenerator({ archetypeActive = false, onGenerate }
       strategy: goal === "sale" ? strategy : undefined,
     });
 
-    // todo: remove mock functionality
     setTimeout(() => {
       setIsGenerating(false);
       setGeneratedContent([
@@ -239,15 +290,41 @@ export default function ContentGenerator({ archetypeActive = false, onGenerate }
         <div className="space-y-6 fade-in">
           <div className="flex justify-between items-center border-b-2 border-purple-300 pb-4 flex-wrap gap-2">
             <h2 className="text-3xl font-mystic text-purple-700">Ваш Контент-План</h2>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              data-testid="button-print"
-              onClick={() => window.print()}
-            >
-              <Printer className="h-4 w-4 mr-1" />
-              Сохранить
-            </Button>
+            <div className="flex gap-2 flex-wrap">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                data-testid="button-print"
+                onClick={() => window.print()}
+              >
+                <Printer className="h-4 w-4 mr-1" />
+                Печать
+              </Button>
+              <Button
+                size="sm"
+                data-testid="button-save-strategy"
+                onClick={handleSaveStrategy}
+                disabled={saveMutation.isPending || saved}
+                className="bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+              >
+                {saved ? (
+                  <>
+                    <Check className="h-4 w-4 mr-1" />
+                    Сохранено!
+                  </>
+                ) : saveMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    Сохраняю...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-1" />
+                    Сохранить
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
           
           <div className="space-y-6">
@@ -280,6 +357,67 @@ export default function ContentGenerator({ archetypeActive = false, onGenerate }
             ))}
           </div>
         </div>
+      )}
+
+      {savedStrategies.length > 0 && (
+        <Card className="fade-in bg-white border-2 border-purple-300 shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between gap-2">
+            <CardTitle className="text-xl font-mystic text-purple-700 flex items-center gap-2">
+              <History className="h-5 w-5 text-pink-500" />
+              Сохранённые стратегии ({savedStrategies.length})
+            </CardTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowHistory(!showHistory)}
+              data-testid="button-toggle-strategy-history"
+            >
+              {showHistory ? "Скрыть" : "Показать"}
+            </Button>
+          </CardHeader>
+          {showHistory && (
+            <CardContent className="space-y-4">
+              {savedStrategies.map((strat) => (
+                <Card key={strat.id} className="bg-purple-50 border-2 border-purple-200">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start gap-2 mb-3">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge variant="secondary" className="bg-purple-100 text-purple-700 border border-purple-300">
+                          {strat.topic}
+                        </Badge>
+                        <Badge variant="outline" className="text-pink-600 border-pink-300">
+                          {strat.goal === "sale" ? "Продажи" : "Вовлечение"}
+                        </Badge>
+                        <Badge variant="outline" className="text-purple-500 border-purple-300">
+                          {strat.days} {strat.days === 1 ? "день" : strat.days < 5 ? "дня" : "дней"}
+                        </Badge>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => deleteMutation.mutate(strat.id)}
+                        data-testid={`button-delete-strategy-${strat.id}`}
+                        className="text-red-500"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="space-y-2">
+                      {strat.posts.slice(0, 2).map((post, idx) => (
+                        <div key={idx} className="text-sm text-purple-600 bg-white p-2 rounded border border-purple-100">
+                          <span className="font-medium">День {post.day}:</span> {post.topic}
+                        </div>
+                      ))}
+                      {strat.posts.length > 2 && (
+                        <p className="text-xs text-purple-500">+ ещё {strat.posts.length - 2} дней...</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </CardContent>
+          )}
+        </Card>
       )}
     </section>
   );
