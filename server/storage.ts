@@ -37,6 +37,17 @@ export interface IStorage {
   createCaseStudy(caseStudy: InsertCaseStudy): Promise<CaseStudy>;
   searchCaseStudies(query: string, userId: string): Promise<CaseStudy[]>;
   deleteCaseStudy(id: string, userId: string): Promise<void>;
+  
+  // Admin
+  getAllUsers(): Promise<User[]>;
+  getAdminStats(): Promise<{
+    totalUsers: number;
+    activeUsers: number;
+    totalStrategies: number;
+    totalVoicePosts: number;
+    totalCaseStudies: number;
+    subscriptionBreakdown: { free: number; standard: number; pro: number };
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -166,6 +177,40 @@ export class DatabaseStorage implements IStorage {
     await db.delete(caseStudies).where(
       and(eq(caseStudies.id, id), eq(caseStudies.userId, userId))
     );
+  }
+
+  // Admin Methods
+  async getAllUsers(): Promise<User[]> {
+    return db.select().from(users).orderBy(desc(users.createdAt));
+  }
+
+  async getAdminStats(): Promise<{
+    totalUsers: number;
+    activeUsers: number;
+    totalStrategies: number;
+    totalVoicePosts: number;
+    totalCaseStudies: number;
+    subscriptionBreakdown: { free: number; standard: number; pro: number };
+  }> {
+    const allUsers = await db.select().from(users);
+    const allStrategies = await db.select().from(contentStrategies);
+    const allVoicePosts = await db.select().from(voicePosts);
+    const allCaseStudies = await db.select().from(caseStudies);
+
+    const subscriptionBreakdown = {
+      free: allUsers.filter(u => !u.subscriptionTier || u.subscriptionTier === "free").length,
+      standard: allUsers.filter(u => u.subscriptionTier === "standard").length,
+      pro: allUsers.filter(u => u.subscriptionTier === "pro").length,
+    };
+
+    return {
+      totalUsers: allUsers.length,
+      activeUsers: allUsers.length,
+      totalStrategies: allStrategies.length,
+      totalVoicePosts: allVoicePosts.length,
+      totalCaseStudies: allCaseStudies.length,
+      subscriptionBreakdown,
+    };
   }
 }
 
