@@ -1,5 +1,5 @@
 import { 
-  type User, type InsertUser,
+  type User, type UpsertUser,
   type ContentStrategy, type InsertContentStrategy,
   type ArchetypeResult, type InsertArchetypeResult,
   type VoicePost, type InsertVoicePost,
@@ -7,62 +7,79 @@ import {
   users, contentStrategies, archetypeResults, voicePosts, caseStudies
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, ilike, or } from "drizzle-orm";
+import { eq, desc, ilike, or, and } from "drizzle-orm";
 
 export interface IStorage {
-  // Users
+  // Users (for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  upsertUser(user: UpsertUser): Promise<User>;
+  updateUser(id: string, data: Partial<UpsertUser>): Promise<User | undefined>;
   
   // Content Strategies
-  getContentStrategies(): Promise<ContentStrategy[]>;
-  getContentStrategy(id: string): Promise<ContentStrategy | undefined>;
+  getContentStrategies(userId: string): Promise<ContentStrategy[]>;
+  getContentStrategy(id: string, userId: string): Promise<ContentStrategy | undefined>;
   createContentStrategy(strategy: InsertContentStrategy): Promise<ContentStrategy>;
-  deleteContentStrategy(id: string): Promise<void>;
+  deleteContentStrategy(id: string, userId: string): Promise<void>;
   
   // Archetype Results
-  getArchetypeResults(): Promise<ArchetypeResult[]>;
-  getLatestArchetypeResult(): Promise<ArchetypeResult | undefined>;
+  getArchetypeResults(userId: string): Promise<ArchetypeResult[]>;
+  getLatestArchetypeResult(userId: string): Promise<ArchetypeResult | undefined>;
   createArchetypeResult(result: InsertArchetypeResult): Promise<ArchetypeResult>;
   
   // Voice Posts
-  getVoicePosts(): Promise<VoicePost[]>;
+  getVoicePosts(userId: string): Promise<VoicePost[]>;
   createVoicePost(post: InsertVoicePost): Promise<VoicePost>;
-  deleteVoicePost(id: string): Promise<void>;
+  deleteVoicePost(id: string, userId: string): Promise<void>;
   
   // Case Studies
-  getCaseStudies(): Promise<CaseStudy[]>;
-  getCaseStudy(id: string): Promise<CaseStudy | undefined>;
+  getCaseStudies(userId: string): Promise<CaseStudy[]>;
+  getCaseStudy(id: string, userId: string): Promise<CaseStudy | undefined>;
   createCaseStudy(caseStudy: InsertCaseStudy): Promise<CaseStudy>;
-  searchCaseStudies(query: string): Promise<CaseStudy[]>;
-  deleteCaseStudy(id: string): Promise<void>;
+  searchCaseStudies(query: string, userId: string): Promise<CaseStudy[]>;
+  deleteCaseStudy(id: string, userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
-  // Users
+  // Users (for Replit Auth)
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
     return user;
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
+  async updateUser(id: string, data: Partial<UpsertUser>): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
     return user;
   }
 
   // Content Strategies
-  async getContentStrategies(): Promise<ContentStrategy[]> {
-    return db.select().from(contentStrategies).orderBy(desc(contentStrategies.createdAt));
+  async getContentStrategies(userId: string): Promise<ContentStrategy[]> {
+    return db.select().from(contentStrategies)
+      .where(eq(contentStrategies.userId, userId))
+      .orderBy(desc(contentStrategies.createdAt));
   }
 
-  async getContentStrategy(id: string): Promise<ContentStrategy | undefined> {
-    const [strategy] = await db.select().from(contentStrategies).where(eq(contentStrategies.id, id));
+  async getContentStrategy(id: string, userId: string): Promise<ContentStrategy | undefined> {
+    const [strategy] = await db.select().from(contentStrategies)
+      .where(and(eq(contentStrategies.id, id), eq(contentStrategies.userId, userId)));
     return strategy;
   }
 
@@ -71,17 +88,22 @@ export class DatabaseStorage implements IStorage {
     return created;
   }
 
-  async deleteContentStrategy(id: string): Promise<void> {
-    await db.delete(contentStrategies).where(eq(contentStrategies.id, id));
+  async deleteContentStrategy(id: string, userId: string): Promise<void> {
+    await db.delete(contentStrategies).where(
+      and(eq(contentStrategies.id, id), eq(contentStrategies.userId, userId))
+    );
   }
 
   // Archetype Results
-  async getArchetypeResults(): Promise<ArchetypeResult[]> {
-    return db.select().from(archetypeResults).orderBy(desc(archetypeResults.createdAt));
+  async getArchetypeResults(userId: string): Promise<ArchetypeResult[]> {
+    return db.select().from(archetypeResults)
+      .where(eq(archetypeResults.userId, userId))
+      .orderBy(desc(archetypeResults.createdAt));
   }
 
-  async getLatestArchetypeResult(): Promise<ArchetypeResult | undefined> {
+  async getLatestArchetypeResult(userId: string): Promise<ArchetypeResult | undefined> {
     const [result] = await db.select().from(archetypeResults)
+      .where(eq(archetypeResults.userId, userId))
       .orderBy(desc(archetypeResults.createdAt))
       .limit(1);
     return result;
@@ -93,8 +115,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Voice Posts
-  async getVoicePosts(): Promise<VoicePost[]> {
-    return db.select().from(voicePosts).orderBy(desc(voicePosts.createdAt));
+  async getVoicePosts(userId: string): Promise<VoicePost[]> {
+    return db.select().from(voicePosts)
+      .where(eq(voicePosts.userId, userId))
+      .orderBy(desc(voicePosts.createdAt));
   }
 
   async createVoicePost(post: InsertVoicePost): Promise<VoicePost> {
@@ -102,17 +126,22 @@ export class DatabaseStorage implements IStorage {
     return created;
   }
 
-  async deleteVoicePost(id: string): Promise<void> {
-    await db.delete(voicePosts).where(eq(voicePosts.id, id));
+  async deleteVoicePost(id: string, userId: string): Promise<void> {
+    await db.delete(voicePosts).where(
+      and(eq(voicePosts.id, id), eq(voicePosts.userId, userId))
+    );
   }
 
   // Case Studies
-  async getCaseStudies(): Promise<CaseStudy[]> {
-    return db.select().from(caseStudies).orderBy(desc(caseStudies.createdAt));
+  async getCaseStudies(userId: string): Promise<CaseStudy[]> {
+    return db.select().from(caseStudies)
+      .where(eq(caseStudies.userId, userId))
+      .orderBy(desc(caseStudies.createdAt));
   }
 
-  async getCaseStudy(id: string): Promise<CaseStudy | undefined> {
-    const [caseStudy] = await db.select().from(caseStudies).where(eq(caseStudies.id, id));
+  async getCaseStudy(id: string, userId: string): Promise<CaseStudy | undefined> {
+    const [caseStudy] = await db.select().from(caseStudies)
+      .where(and(eq(caseStudies.id, id), eq(caseStudies.userId, userId)));
     return caseStudy;
   }
 
@@ -121,20 +150,22 @@ export class DatabaseStorage implements IStorage {
     return created;
   }
 
-  async searchCaseStudies(query: string): Promise<CaseStudy[]> {
+  async searchCaseStudies(query: string, userId: string): Promise<CaseStudy[]> {
+    const searchCondition = or(
+      ilike(caseStudies.reviewText, `%${query}%`),
+      ilike(caseStudies.generatedQuote, `%${query}%`),
+      ilike(caseStudies.generatedBody, `%${query}%`)
+    );
+    
     return db.select().from(caseStudies)
-      .where(
-        or(
-          ilike(caseStudies.reviewText, `%${query}%`),
-          ilike(caseStudies.generatedQuote, `%${query}%`),
-          ilike(caseStudies.generatedBody, `%${query}%`)
-        )
-      )
+      .where(and(eq(caseStudies.userId, userId), searchCondition))
       .orderBy(desc(caseStudies.createdAt));
   }
 
-  async deleteCaseStudy(id: string): Promise<void> {
-    await db.delete(caseStudies).where(eq(caseStudies.id, id));
+  async deleteCaseStudy(id: string, userId: string): Promise<void> {
+    await db.delete(caseStudies).where(
+      and(eq(caseStudies.id, id), eq(caseStudies.userId, userId))
+    );
   }
 }
 

@@ -50,11 +50,7 @@ export default function Home() {
           />
         )}
         
-        {activeTab === "cases" && (
-          <CasesManager
-            onSaveCase={(caseData) => console.log("Case saved:", caseData)}
-          />
-        )}
+        {activeTab === "cases" && <CasesManager />}
         
         {activeTab === "calendar" && <LunarCalendar />}
       </div>
