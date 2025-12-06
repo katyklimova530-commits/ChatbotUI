@@ -7,9 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dna, Loader2, Printer, Coins, Flame, Sparkles, Save, Check, History, Trash2 } from "lucide-react";
+import { Dna, Loader2, Printer, Coins, Flame, Sparkles, Save, Check, History, Trash2, Lock, Crown } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import type { ContentStrategy, ContentPost } from "@shared/schema";
+
+interface GenerationLimit {
+  allowed: boolean;
+  reason?: string;
+  remaining?: number;
+}
 
 type ContentGoal = "sale" | "engagement";
 type DaysCount = "today" | "3" | "7" | "14" | "30";
@@ -44,6 +51,11 @@ export default function ContentGenerator({ archetypeActive = false, onGenerate }
   const [generatedContent, setGeneratedContent] = useState<ContentDay[]>([]);
   const [saved, setSaved] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const { toast } = useToast();
+
+  const { data: generationLimit } = useQuery<GenerationLimit>({
+    queryKey: ["/api/generation-limit"],
+  });
 
   const { data: savedStrategies = [] } = useQuery<ContentStrategy[]>({
     queryKey: ["/api/strategies"],
@@ -93,6 +105,16 @@ export default function ContentGenerator({ archetypeActive = false, onGenerate }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (generationLimit && !generationLimit.allowed) {
+      toast({
+        title: "Лимит достигнут",
+        description: generationLimit.reason,
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsGenerating(true);
     setSaved(false);
     
@@ -129,23 +151,44 @@ export default function ContentGenerator({ archetypeActive = false, onGenerate }
           hashtags: ["#консультация", "#таролог", "#запись"],
         },
       ]);
+      queryClient.invalidateQueries({ queryKey: ["/api/generation-limit"] });
     }, 1500);
   };
+
+  const limitReached = generationLimit && !generationLimit.allowed;
+  const isPro = generationLimit?.remaining === -1;
 
   return (
     <section className="fade-in space-y-8">
       <Card className="relative overflow-visible bg-white border-2 border-purple-300 shadow-lg">
         <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-gradient-to-br from-purple-300 to-pink-300 rounded-full blur-3xl opacity-30 pointer-events-none" />
         
-        {archetypeActive && (
-          <Badge 
-            variant="secondary" 
-            className="absolute top-4 right-4 bg-purple-100 text-purple-700 border-2 border-purple-400"
-          >
-            <Dna className="h-3 w-3 mr-1" />
-            Архетип активен
-          </Badge>
-        )}
+        <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
+          {archetypeActive && (
+            <Badge 
+              variant="secondary" 
+              className="bg-purple-100 text-purple-700 border-2 border-purple-400"
+            >
+              <Dna className="h-3 w-3 mr-1" />
+              Архетип активен
+            </Badge>
+          )}
+          {isPro ? (
+            <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
+              <Crown className="h-3 w-3 mr-1" />
+              PRO - Безлимит
+            </Badge>
+          ) : limitReached ? (
+            <Badge variant="destructive" className="border-2 border-red-400">
+              <Lock className="h-3 w-3 mr-1" />
+              Лимит исчерпан
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="text-purple-600 border-2 border-purple-300">
+              Осталось: {generationLimit?.remaining ?? 1} генерация
+            </Badge>
+          )}
+        </div>
         
         <CardHeader>
           <CardTitle className="text-2xl font-mystic font-semibold text-purple-700">
@@ -264,24 +307,43 @@ export default function ContentGenerator({ archetypeActive = false, onGenerate }
               </>
             )}
 
-            <Button
-              type="submit"
-              data-testid="button-generate"
-              disabled={isGenerating || !niche}
-              className="w-full py-6 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-xl shadow-lg border-2 border-purple-400"
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                  Генерирую стратегию...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-5 w-5 mr-2" />
-                  Создать Стратегию
-                </>
-              )}
-            </Button>
+            {limitReached ? (
+              <div className="space-y-3">
+                <div className="p-4 bg-red-50 border-2 border-red-300 rounded-xl text-center">
+                  <Lock className="h-6 w-6 text-red-500 mx-auto mb-2" />
+                  <p className="text-red-700 font-medium">Дневной лимит исчерпан</p>
+                  <p className="text-red-500 text-sm">Бесплатный тариф: 1 генерация в сутки</p>
+                </div>
+                <Button
+                  type="button"
+                  data-testid="button-upgrade-pro"
+                  className="w-full py-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-xl shadow-lg border-2 border-purple-400"
+                  onClick={() => window.location.href = "/grimoire"}
+                >
+                  <Crown className="h-5 w-5 mr-2" />
+                  Перейти на PRO - Безлимитный доступ
+                </Button>
+              </div>
+            ) : (
+              <Button
+                type="submit"
+                data-testid="button-generate"
+                disabled={isGenerating || !niche}
+                className="w-full py-6 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-xl shadow-lg border-2 border-purple-400"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                    Генерирую стратегию...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-5 w-5 mr-2" />
+                    Создать Стратегию
+                  </>
+                )}
+              </Button>
+            )}
           </form>
         </CardContent>
       </Card>

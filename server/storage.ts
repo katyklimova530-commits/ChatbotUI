@@ -48,6 +48,10 @@ export interface IStorage {
     totalCaseStudies: number;
     subscriptionBreakdown: { free: number; standard: number; pro: number };
   }>;
+  
+  // Generation limits
+  canGenerateStrategy(userId: string): Promise<{ allowed: boolean; reason?: string; remaining?: number }>;
+  incrementDailyGeneration(userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -211,6 +215,49 @@ export class DatabaseStorage implements IStorage {
       totalCaseStudies: allCaseStudies.length,
       subscriptionBreakdown,
     };
+  }
+
+  // Generation Limits
+  async canGenerateStrategy(userId: string): Promise<{ allowed: boolean; reason?: string; remaining?: number }> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      return { allowed: false, reason: "Пользователь не найден" };
+    }
+
+    // PRO users (standard or pro tier) have unlimited generations
+    if (user.subscriptionTier === "standard" || user.subscriptionTier === "pro") {
+      return { allowed: true, remaining: -1 };
+    }
+
+    // Free users: 1 generation per day
+    const today = new Date().toISOString().split("T")[0];
+    const dailyUsed = user.lastGenerationDate === today ? (user.dailyGenerationsUsed || 0) : 0;
+    const dailyLimit = 1;
+
+    if (dailyUsed >= dailyLimit) {
+      return { 
+        allowed: false, 
+        reason: "Достигнут дневной лимит. Бесплатный тариф позволяет 1 генерацию в сутки. Перейдите на PRO для безлимитного доступа.",
+        remaining: 0
+      };
+    }
+
+    return { allowed: true, remaining: dailyLimit - dailyUsed };
+  }
+
+  async incrementDailyGeneration(userId: string): Promise<void> {
+    const user = await this.getUser(userId);
+    if (!user) return;
+
+    const today = new Date().toISOString().split("T")[0];
+    const isNewDay = user.lastGenerationDate !== today;
+
+    await db.update(users).set({
+      dailyGenerationsUsed: isNewDay ? 1 : (user.dailyGenerationsUsed || 0) + 1,
+      lastGenerationDate: today,
+      generationsUsed: (user.generationsUsed || 0) + 1,
+      updatedAt: new Date(),
+    }).where(eq(users.id, userId));
   }
 }
 

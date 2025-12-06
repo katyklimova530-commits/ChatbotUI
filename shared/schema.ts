@@ -25,6 +25,8 @@ export const users = pgTable("users", {
   subscriptionTier: varchar("subscription_tier").default("free"),
   generationsUsed: integer("generations_used").default(0),
   generationsLimit: integer("generations_limit").default(50),
+  dailyGenerationsUsed: integer("daily_generations_used").default(0),
+  lastGenerationDate: varchar("last_generation_date"),
   isAdmin: boolean("is_admin").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

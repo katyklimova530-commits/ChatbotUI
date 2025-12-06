@@ -61,14 +61,35 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/generation-limit", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const limit = await storage.canGenerateStrategy(userId);
+      res.json(limit);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to check generation limit" });
+    }
+  });
+
   app.post("/api/strategies", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      
+      // Check generation limit
+      const limitCheck = await storage.canGenerateStrategy(userId);
+      if (!limitCheck.allowed) {
+        return res.status(403).json({ error: limitCheck.reason, limitReached: true });
+      }
+      
       const parsed = insertContentStrategySchema.safeParse({ ...req.body, userId });
       if (!parsed.success) {
         return res.status(400).json({ error: parsed.error.message });
       }
       const strategy = await storage.createContentStrategy(parsed.data);
+      
+      // Increment daily generation count
+      await storage.incrementDailyGeneration(userId);
+      
       res.status(201).json(strategy);
     } catch (error) {
       res.status(500).json({ error: "Failed to create strategy" });
