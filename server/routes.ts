@@ -207,18 +207,23 @@ export async function registerRoutes(
   });
 
   // Admin Routes
-  const isAdmin = async (req: any, res: any, next: any) => {
-    if (!req.isAuthenticated?.() || !req.user?.claims?.sub) {
-      return res.status(401).json({ message: "Unauthorized" });
+  const requireAdmin = async (req: any, res: any, next: any) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const user = await storage.getUser(userId);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      return next();
+    } catch (error) {
+      return res.status(500).json({ message: "Server error" });
     }
-    const user = await storage.getUser(req.user.claims.sub);
-    if (!user?.isAdmin) {
-      return res.status(403).json({ message: "Forbidden" });
-    }
-    next();
   };
 
-  app.get("/api/admin/stats", isAdmin, async (req: any, res) => {
+  app.get("/api/admin/stats", isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
       const stats = await storage.getAdminStats();
       res.json(stats);
@@ -227,7 +232,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/admin/users", isAdmin, async (req: any, res) => {
+  app.get("/api/admin/users", isAuthenticated, requireAdmin, async (req: any, res) => {
     try {
       const users = await storage.getAllUsers();
       res.json(users);

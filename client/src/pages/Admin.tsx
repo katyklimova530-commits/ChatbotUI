@@ -30,10 +30,12 @@ export default function Admin() {
 
   const { data: stats } = useQuery<AdminStats>({
     queryKey: ["/api/admin/stats"],
+    enabled: !!user?.isAdmin,
   });
 
   const { data: allUsers = [] } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
+    enabled: !!user?.isAdmin,
   });
 
   if (!user?.isAdmin) {
