@@ -123,3 +123,43 @@ export const insertCaseStudySchema = createInsertSchema(caseStudies).omit({
 
 export type InsertCaseStudy = z.infer<typeof insertCaseStudySchema>;
 export type CaseStudy = typeof caseStudies.$inferSelect;
+
+// Money Trainer - Training Samples (примеры для обучения AI)
+export const salesTrainerSamples = pgTable("sales_trainer_samples", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  clientQuestion: text("client_question").notNull(),
+  expertDraft: text("expert_draft"),
+  improvedAnswer: text("improved_answer").notNull(),
+  coachFeedback: text("coach_feedback"),
+  painType: varchar("pain_type"), // relationships, career, money, health, etc.
+  tags: jsonb("tags").$type<string[]>(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertSalesTrainerSampleSchema = createInsertSchema(salesTrainerSamples).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertSalesTrainerSample = z.infer<typeof insertSalesTrainerSampleSchema>;
+export type SalesTrainerSample = typeof salesTrainerSamples.$inferSelect;
+
+// Money Trainer - User Sessions (история генераций пользователя)
+export const salesTrainerSessions = pgTable("sales_trainer_sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id),
+  clientQuestion: text("client_question").notNull(),
+  expertDraft: text("expert_draft").notNull(),
+  improvedAnswer: text("improved_answer").notNull(),
+  painType: varchar("pain_type"),
+  offerType: varchar("offer_type"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertSalesTrainerSessionSchema = createInsertSchema(salesTrainerSessions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertSalesTrainerSession = z.infer<typeof insertSalesTrainerSessionSchema>;
+export type SalesTrainerSession = typeof salesTrainerSessions.$inferSelect;
