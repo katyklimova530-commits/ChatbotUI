@@ -1,4 +1,4 @@
-import { Sparkles, User, LogOut } from "lucide-react";
+import { Sparkles, LogOut, LogIn } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,7 +12,7 @@ interface HeaderProps {
 export default function Header({ 
   subtitle = "Стратегия • Контент • Энергия • Продажи"
 }: HeaderProps) {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const displayName = user?.nickname || user?.firstName || user?.email?.split("@")[0] || "Эксперт";
 
   return (
@@ -23,22 +23,33 @@ export default function Header({
           <span className="text-lg font-mystic text-purple-700">Эзотерический Планировщик</span>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="ghost" asChild data-testid="link-grimoire">
-            <Link href="/grimoire" className="flex items-center gap-2">
-              <Avatar className="h-8 w-8 border-2 border-purple-300">
-                <AvatarImage src={user?.profileImageUrl || ""} />
-                <AvatarFallback className="bg-gradient-to-br from-purple-400 to-pink-400 text-white text-sm">
-                  {displayName.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <span className="hidden sm:inline text-purple-600">{displayName}</span>
-            </Link>
-          </Button>
-          <Button variant="outline" size="icon" asChild data-testid="button-logout">
-            <a href="/api/logout">
-              <LogOut className="h-4 w-4 text-purple-600" />
-            </a>
-          </Button>
+          {isAuthenticated ? (
+            <>
+              <Button variant="ghost" asChild data-testid="link-grimoire">
+                <Link href="/grimoire" className="flex items-center gap-2">
+                  <Avatar className="h-8 w-8 border-2 border-purple-300">
+                    <AvatarImage src={user?.profileImageUrl || ""} />
+                    <AvatarFallback className="bg-gradient-to-br from-purple-400 to-pink-400 text-white text-sm">
+                      {displayName.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="hidden sm:inline text-purple-600">{displayName}</span>
+                </Link>
+              </Button>
+              <Button variant="outline" size="icon" asChild data-testid="button-logout">
+                <a href="/api/logout">
+                  <LogOut className="h-4 w-4 text-purple-600" />
+                </a>
+              </Button>
+            </>
+          ) : (
+            <Button asChild data-testid="button-login" className="bg-gradient-to-r from-purple-500 to-pink-500">
+              <a href="/api/login" className="flex items-center gap-2">
+                <LogIn className="h-4 w-4" />
+                <span>Войти</span>
+              </a>
+            </Button>
+          )}
         </div>
       </div>
       <div className="text-center mb-12">
