@@ -4,7 +4,10 @@ import {
   type ArchetypeResult, type InsertArchetypeResult,
   type VoicePost, type InsertVoicePost,
   type CaseStudy, type InsertCaseStudy,
-  users, contentStrategies, archetypeResults, voicePosts, caseStudies
+  type SalesTrainerSample, type InsertSalesTrainerSample,
+  type SalesTrainerSession, type InsertSalesTrainerSession,
+  users, contentStrategies, archetypeResults, voicePosts, caseStudies,
+  salesTrainerSamples, salesTrainerSessions
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, ilike, or, and } from "drizzle-orm";
@@ -52,6 +55,13 @@ export interface IStorage {
   // Generation limits
   canGenerateStrategy(userId: string): Promise<{ allowed: boolean; reason?: string; remaining?: number }>;
   incrementDailyGeneration(userId: string): Promise<void>;
+  
+  // Sales Trainer (Money Trainer)
+  getSalesTrainerSamples(): Promise<SalesTrainerSample[]>;
+  getSalesTrainerSamplesByPainType(painType: string): Promise<SalesTrainerSample[]>;
+  createSalesTrainerSample(sample: InsertSalesTrainerSample): Promise<SalesTrainerSample>;
+  getSalesTrainerSessions(userId: string): Promise<SalesTrainerSession[]>;
+  createSalesTrainerSession(session: InsertSalesTrainerSession): Promise<SalesTrainerSession>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -258,6 +268,34 @@ export class DatabaseStorage implements IStorage {
       generationsUsed: (user.generationsUsed || 0) + 1,
       updatedAt: new Date(),
     }).where(eq(users.id, userId));
+  }
+
+  // Sales Trainer (Money Trainer) Methods
+  async getSalesTrainerSamples(): Promise<SalesTrainerSample[]> {
+    return db.select().from(salesTrainerSamples).orderBy(desc(salesTrainerSamples.createdAt));
+  }
+
+  async getSalesTrainerSamplesByPainType(painType: string): Promise<SalesTrainerSample[]> {
+    return db.select().from(salesTrainerSamples)
+      .where(eq(salesTrainerSamples.painType, painType))
+      .orderBy(desc(salesTrainerSamples.createdAt))
+      .limit(3);
+  }
+
+  async createSalesTrainerSample(sample: InsertSalesTrainerSample): Promise<SalesTrainerSample> {
+    const [created] = await db.insert(salesTrainerSamples).values(sample).returning();
+    return created;
+  }
+
+  async getSalesTrainerSessions(userId: string): Promise<SalesTrainerSession[]> {
+    return db.select().from(salesTrainerSessions)
+      .where(eq(salesTrainerSessions.userId, userId))
+      .orderBy(desc(salesTrainerSessions.createdAt));
+  }
+
+  async createSalesTrainerSession(session: InsertSalesTrainerSession): Promise<SalesTrainerSession> {
+    const [created] = await db.insert(salesTrainerSessions).values(session).returning();
+    return created;
   }
 }
 
