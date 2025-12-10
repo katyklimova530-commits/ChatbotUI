@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
@@ -35,7 +34,6 @@ export default function MoneyTrainer() {
   const [expertDraft, setExpertDraft] = useState("");
   const [painType, setPainType] = useState("");
   const [offerType, setOfferType] = useState("");
-  const [openaiApiKey, setOpenaiApiKey] = useState("");
   const [improvedAnswer, setImprovedAnswer] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -53,7 +51,6 @@ export default function MoneyTrainer() {
       expertDraft: string;
       painType?: string;
       offerType?: string;
-      openaiApiKey: string;
     }) => {
       const response = await apiRequest("POST", "/api/trainer/generate", data);
       return response.json();
@@ -91,21 +88,12 @@ export default function MoneyTrainer() {
       });
       return;
     }
-    if (!openaiApiKey.trim()) {
-      toast({
-        title: "Введите OpenAI API ключ",
-        description: "Ключ нужен для генерации ответа",
-        variant: "destructive",
-      });
-      return;
-    }
 
     generateMutation.mutate({
       clientQuestion,
       expertDraft,
       painType: painType || undefined,
       offerType: offerType || undefined,
-      openaiApiKey,
     });
   };
 
@@ -225,22 +213,6 @@ export default function MoneyTrainer() {
                   onChange={(e) => setExpertDraft(e.target.value)}
                   className="min-h-[120px] border-purple-200 focus:border-purple-400"
                 />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="openai-key">OpenAI API Ключ</Label>
-                <Input
-                  id="openai-key"
-                  data-testid="input-openai-key"
-                  type="password"
-                  placeholder="sk-..."
-                  value={openaiApiKey}
-                  onChange={(e) => setOpenaiApiKey(e.target.value)}
-                  className="border-purple-200 focus:border-purple-400"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Получить ключ можно на platform.openai.com
-                </p>
               </div>
 
               <Button

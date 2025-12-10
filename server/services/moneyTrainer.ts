@@ -23,11 +23,16 @@ interface GenerateImprovedAnswerParams {
 }
 
 export async function generateImprovedAnswer(
-  params: GenerateImprovedAnswerParams,
-  apiKey: string
+  params: GenerateImprovedAnswerParams
 ): Promise<string> {
-  const openai = new OpenAI({
+  const apiKey = process.env.DEEPSEEK_API_KEY;
+  if (!apiKey) {
+    throw new Error("DEEPSEEK_API_KEY не настроен");
+  }
+
+  const client = new OpenAI({
     apiKey: apiKey,
+    baseURL: "https://api.deepseek.com",
   });
 
   const fewShotExamples = params.samples.slice(0, 3).map((sample, i) => `
@@ -49,8 +54,8 @@ ${params.offerType ? `Желаемое предложение: ${params.offerTyp
 Напиши улучшенную версию ответа, которая закроет клиента на продажу:`;
 
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+    const response = await client.chat.completions.create({
+      model: "deepseek-chat",
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: userPrompt }
@@ -61,7 +66,7 @@ ${params.offerType ? `Желаемое предложение: ${params.offerTyp
 
     return response.choices[0]?.message?.content || "Не удалось сгенерировать ответ";
   } catch (error: any) {
-    console.error("OpenAI API error:", error);
+    console.error("DeepSeek API error:", error);
     throw new Error(`Ошибка API: ${error.message}`);
   }
 }

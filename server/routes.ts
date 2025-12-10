@@ -299,14 +299,10 @@ export async function registerRoutes(
   app.post("/api/trainer/generate", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { clientQuestion, expertDraft, painType, offerType, openaiApiKey } = req.body;
+      const { clientQuestion, expertDraft, painType, offerType } = req.body;
 
       if (!clientQuestion || !expertDraft) {
         return res.status(400).json({ error: "Вопрос клиента и черновик ответа обязательны" });
-      }
-
-      if (!openaiApiKey) {
-        return res.status(400).json({ error: "Требуется OpenAI API ключ" });
       }
 
       // Check generation limit
@@ -327,7 +323,7 @@ export async function registerRoutes(
         painType,
         offerType,
         samples: samples.slice(0, 3),
-      }, openaiApiKey);
+      });
 
       // Save session
       const session = await storage.createSalesTrainerSession({
