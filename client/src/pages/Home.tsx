@@ -7,6 +7,7 @@ import ArchetypeQuiz from "@/components/ArchetypeQuiz";
 import VoiceRecorder from "@/components/VoiceRecorder";
 import CasesManager from "@/components/CasesManager";
 import LunarCalendar from "@/components/LunarCalendar";
+import MoneyTrainer from "@/components/MoneyTrainer";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabName | null>(null);
@@ -53,6 +54,8 @@ export default function Home() {
         {activeTab === "cases" && <CasesManager />}
         
         {activeTab === "calendar" && <LunarCalendar />}
+        
+        {activeTab === "trainer" && <MoneyTrainer />}
       </div>
     </div>
   );
