@@ -1,8 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertContentStrategySchema, insertArchetypeResultSchema, insertVoicePostSchema, insertCaseStudySchema } from "@shared/schema";
+import { insertContentStrategySchema, insertArchetypeResultSchema, insertVoicePostSchema, insertCaseStudySchema, insertSalesTrainerSampleSchema } from "@shared/schema";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { generateImprovedAnswer } from "./services/moneyTrainer";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -259,6 +260,92 @@ export async function registerRoutes(
       res.json(users);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch users" });
+    }
+  });
+
+  // Money Trainer Routes
+  app.get("/api/trainer/samples", isAuthenticated, async (req: any, res) => {
+    try {
+      const samples = await storage.getSalesTrainerSamples();
+      res.json(samples);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch training samples" });
+    }
+  });
+
+  app.post("/api/trainer/samples", isAuthenticated, requireAdmin, async (req: any, res) => {
+    try {
+      const parsed = insertSalesTrainerSampleSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.message });
+      }
+      const sample = await storage.createSalesTrainerSample(parsed.data);
+      res.status(201).json(sample);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create training sample" });
+    }
+  });
+
+  app.get("/api/trainer/sessions", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const sessions = await storage.getSalesTrainerSessions(userId);
+      res.json(sessions);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch trainer sessions" });
+    }
+  });
+
+  app.post("/api/trainer/generate", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { clientQuestion, expertDraft, painType, offerType, openaiApiKey } = req.body;
+
+      if (!clientQuestion || !expertDraft) {
+        return res.status(400).json({ error: "Вопрос клиента и черновик ответа обязательны" });
+      }
+
+      if (!openaiApiKey) {
+        return res.status(400).json({ error: "Требуется OpenAI API ключ" });
+      }
+
+      // Check generation limit
+      const limitCheck = await storage.canGenerateStrategy(userId);
+      if (!limitCheck.allowed) {
+        return res.status(403).json({ error: limitCheck.reason, limitReached: true });
+      }
+
+      // Get relevant training samples
+      const samples = painType 
+        ? await storage.getSalesTrainerSamplesByPainType(painType)
+        : await storage.getSalesTrainerSamples();
+
+      // Generate improved answer using AI
+      const improvedAnswer = await generateImprovedAnswer({
+        clientQuestion,
+        expertDraft,
+        painType,
+        offerType,
+        samples: samples.slice(0, 3),
+      }, openaiApiKey);
+
+      // Save session
+      const session = await storage.createSalesTrainerSession({
+        userId,
+        clientQuestion,
+        expertDraft,
+        improvedAnswer,
+        painType,
+        offerType,
+      });
+
+      // Increment daily generation count
+      await storage.incrementDailyGeneration(userId);
+
+      res.json({ improvedAnswer, sessionId: session.id });
+    } catch (error: any) {
+      console.error("Trainer generation error:", error);
+      res.status(500).json({ error: error.message || "Failed to generate improved answer" });
     }
   });
 
